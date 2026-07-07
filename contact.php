@@ -10,11 +10,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $raw = file_get_contents('php://input');
 $data = json_decode($raw, true);
 
-$firstName = trim($data['firstName'] ?? '');
-$lastName  = trim($data['lastName']  ?? '');
-$email     = trim($data['email']     ?? '');
-$phone     = trim($data['phone']     ?? '');
-$message   = trim($data['message']   ?? '');
+$firstName      = trim($data['firstName']      ?? '');
+$lastName       = trim($data['lastName']       ?? '');
+$email          = trim($data['email']          ?? '');
+$phone          = trim($data['phone']          ?? '');
+$message        = trim($data['message']        ?? '');
+$recaptchaToken = trim($data['recaptchaToken'] ?? '');
 
 // Honeypot — bots fill this in, humans leave it blank
 if (!empty($data['website'])) {
@@ -22,13 +23,35 @@ if (!empty($data['website'])) {
     exit;
 }
 
+// Basic validation
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || empty($message)) {
     http_response_code(400);
     echo json_encode(['error' => 'Please provide a valid email address and message.']);
     exit;
 }
 
-$name = htmlspecialchars($firstName . ' ' . $lastName);
+// Verify reCAPTCHA v3 token
+if (empty($recaptchaToken)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Security check failed. Please refresh the page and try again.']);
+    exit;
+}
+
+$secretKey = '6LePW0gtAAAAAGZQstPzvy9txXTgBzG_isTCKNLY';
+$verifyResponse = file_get_contents(
+    'https://www.google.com/recaptcha/api/siteverify?secret=' . urlencode($secretKey) .
+    '&response=' . urlencode($recaptchaToken)
+);
+$verifyData = json_decode($verifyResponse, true);
+
+if (!$verifyData['success'] || $verifyData['score'] < 0.5) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Security check failed. Please try again.']);
+    exit;
+}
+
+// Send the email
+$name        = htmlspecialchars($firstName . ' ' . $lastName);
 $safeEmail   = htmlspecialchars($email);
 $safePhone   = htmlspecialchars($phone);
 $safeMessage = htmlspecialchars($message);
