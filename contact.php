@@ -15,7 +15,18 @@ $lastName       = trim($data['lastName']       ?? '');
 $email          = trim($data['email']          ?? '');
 $phone          = trim($data['phone']          ?? '');
 $message        = trim($data['message']        ?? '');
+$enquiryType    = trim($data['enquiryType']    ?? 'general');
 $recaptchaToken = trim($data['recaptchaToken'] ?? '');
+
+// Enquiry type → subject label + recipient email.
+// All currently route to the same inbox; update the email values here
+// when separate mailboxes are ready for each department.
+$enquiryTypes = [
+    'general'       => ['label' => 'General Enquiry',       'email' => 'stay@oceanshotel.co.nz'],
+    'accommodation' => ['label' => 'Accommodation Enquiry',  'email' => 'stay@oceanshotel.co.nz'],
+    'restaurant'    => ['label' => 'Restaurant Enquiry/Booking', 'email' => 'stay@oceanshotel.co.nz'],
+];
+$enquiry = $enquiryTypes[$enquiryType] ?? $enquiryTypes['general'];
 
 // Honeypot — bots fill this in, humans leave it blank
 if (!empty($data['website'])) {
@@ -56,9 +67,10 @@ $safeEmail   = htmlspecialchars($email);
 $safePhone   = htmlspecialchars($phone);
 $safeMessage = htmlspecialchars($message);
 
-$to      = 'stay@oceanshotel.co.nz';
-$subject = 'Website Enquiry from ' . $name;
+$to      = $enquiry['email'];
+$subject = 'Website Enquiry - ' . $enquiry['label'] . ' from ' . $name;
 $body    = implode("\n", [
+    "Enquiry Type: " . $enquiry['label'],
     "Name:    $name",
     "Email:   $safeEmail",
     "Phone:   $safePhone",
