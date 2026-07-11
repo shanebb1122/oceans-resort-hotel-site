@@ -22,9 +22,9 @@ $recaptchaToken = trim($data['recaptchaToken'] ?? '');
 // All currently route to the same inbox; update the email values here
 // when separate mailboxes are ready for each department.
 $enquiryTypes = [
-    'general'       => ['label' => 'General Enquiry',       'email' => 'stay@oceanshotel.co.nz'],
-    'accommodation' => ['label' => 'Accommodation Enquiry',  'email' => 'stay@oceanshotel.co.nz'],
-    'restaurant'    => ['label' => 'Restaurant Enquiry/Booking', 'email' => 'stay@oceanshotel.co.nz'],
+    'general'       => ['label' => 'General Enquiry',       'email' => 'stay@oceansresorthotel.co.nz'],
+    'accommodation' => ['label' => 'Accommodation Enquiry',  'email' => 'stay@oceansresorthotel.co.nz'],
+    'restaurant'    => ['label' => 'Restaurant Enquiry/Booking', 'email' => 'stay@oceansresorthotel.co.nz'],
 ];
 $enquiry = $enquiryTypes[$enquiryType] ?? $enquiryTypes['general'];
 
@@ -87,8 +87,32 @@ $headers = implode("\r\n", [
 ]);
 
 if (mail($to, $subject, $body, $headers)) {
+    // Auto-reply to the enquirer confirming receipt.
+    $replySubject = 'We\'ve received your enquiry - Quality Hotel Oceans Tūtūkaka';
+    $replyBody    = implode("\n", [
+        "Hi $name,",
+        "",
+        "Thank you for contacting Quality Hotel Oceans Tūtūkaka. We've received your " . strtolower($enquiry['label']) . " and will be in touch shortly.",
+        "",
+        "For your reference, here's a copy of your message:",
+        "",
+        $safeMessage,
+        "",
+        "If your enquiry is urgent, please call us on 09 470 2280.",
+        "",
+        "Kind regards,",
+        "Quality Hotel Oceans Tūtūkaka",
+        "11 Marina Road, Tūtūkaka 0173, New Zealand",
+    ]);
+    $replyHeaders = implode("\r\n", [
+        'From: ' . $enquiry['email'],
+        'Content-Type: text/plain; charset=UTF-8',
+        'X-Mailer: PHP/' . phpversion(),
+    ]);
+    mail($email, $replySubject, $replyBody, $replyHeaders);
+
     echo json_encode(['success' => true]);
 } else {
     http_response_code(500);
-    echo json_encode(['error' => 'Sorry, the message could not be sent. Please email us directly at stay@oceanshotel.co.nz']);
+    echo json_encode(['error' => 'Sorry, the message could not be sent. Please email us directly at stay@oceansresorthotel.co.nz']);
 }
