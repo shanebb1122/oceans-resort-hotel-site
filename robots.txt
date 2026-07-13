@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://www.oceansresorthotel.co.nz/sitemap.xml
