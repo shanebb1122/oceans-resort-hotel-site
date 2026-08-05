@@ -22,9 +22,9 @@ $recaptchaToken = trim($data['recaptchaToken'] ?? '');
 // All currently route to the same inbox; update the email values here
 // when separate mailboxes are ready for each department.
 $enquiryTypes = [
-    'general'       => ['label' => 'General Enquiry',       'email' => 'stay@oceansresorthotel.co.nz'],
-    'accommodation' => ['label' => 'Accommodation Enquiry',  'email' => 'stay@oceansresorthotel.co.nz'],
-    'restaurant'    => ['label' => 'Restaurant Enquiry/Booking', 'email' => 'stay@oceansresorthotel.co.nz'],
+    'general'       => ['label' => 'General Enquiry',       'email' => 'stay@oceanshotel.co.nz'],
+    'accommodation' => ['label' => 'Accommodation Enquiry',  'email' => 'stay@oceanshotel.co.nz'],
+    'restaurant'    => ['label' => 'Restaurant Enquiry/Booking', 'email' => 'stay@oceanshotel.co.nz'],
 ];
 $enquiry = $enquiryTypes[$enquiryType] ?? $enquiryTypes['general'];
 
@@ -114,5 +114,5 @@ if (mail($to, $subject, $body, $headers)) {
     echo json_encode(['success' => true]);
 } else {
     http_response_code(500);
-    echo json_encode(['error' => 'Sorry, the message could not be sent. Please email us directly at stay@oceansresorthotel.co.nz']);
+    echo json_encode(['error' => 'Sorry, the message could not be sent. Please email us directly at stay@oceanshotel.co.nz']);
 }
