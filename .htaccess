@@ -1,14 +1,32 @@
 Options -Indexes
+DirectoryIndex index.html
+DirectorySlash Off
+ErrorDocument 404 /404.html
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
 
-    # Serve existing files and directories directly (assets, images, PHP, PDF, etc.)
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
+    # Normalise public page variants AND host/protocol in one hop.
+    # THE_REQUEST prevents a second redirect after an internal file rewrite.
+    # Existing query strings (enquiry preselection / permanent TV QR) survive.
+    RewriteCond %{THE_REQUEST} \s/+[^?\s]*(?:/|/index\.html)[?\s] [NC]
+    RewriteRule ^(about|rooms|dining|activities|gallery|conference|reviews|contact|gift-vouchers|events|past-events|privacy-policy|pasta-don|art|terry-walsh|wai-i-kukawaka|compendium)(?:/+|/index\.html)$ https://www.oceansresorthotel.co.nz/$1 [R=301,L,NE]
 
-    # Route everything else to index.html for client-side routing
-    RewriteRule ^ index.html [L]
+    RewriteCond %{THE_REQUEST} \s/+index\.html[?\s] [NC]
+    RewriteRule ^index\.html$ https://www.oceansresorthotel.co.nz/ [R=301,L,NE]
+
+    # The hosting load balancer terminates TLS and supplies env HTTPS.
+    # Use the provider's exact lowercase env lookup, not Apache's TLS flag.
+    # Do not set this from untrusted forwarded headers in .htaccess.
+    RewriteCond %{env:HTTPS} !^on$ [NC,OR]
+    RewriteCond %{HTTP_HOST} !^www\.oceansresorthotel\.co\.nz$ [NC]
+    RewriteRule ^ https://www.oceansresorthotel.co.nz%{REQUEST_URI} [R=301,L,NE]
+
+    # Direct requests to the error document also have a real 404 status.
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteRule ^404\.html$ - [R=404,L]
+
+    # Explicit public routes only: no SPA catch-all and no soft 404s.
+    RewriteRule ^(about|rooms|dining|activities|gallery|conference|reviews|contact|gift-vouchers|events|past-events|privacy-policy|pasta-don|art|terry-walsh|wai-i-kukawaka|compendium)$ $1/index.html [END]
 </IfModule>
