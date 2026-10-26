@@ -7,6 +7,20 @@ ErrorDocument 404 /404.html
     RewriteEngine On
     RewriteBase /
 
+    # Confirmed historical URLs: redirect directly to their canonical replacements.
+    RewriteRule ^dining/te-akau-roa-menu/?$ https://www.oceansresorthotel.co.nz/dining [R=301,L,NE]
+    RewriteRule ^contact-us/?$ https://www.oceansresorthotel.co.nz/contact [R=301,L,NE]
+    RewriteCond %{QUERY_STRING} !^$
+    RewriteRule ^rooms/king-room-with-marina-view/?$ https://www.oceansresorthotel.co.nz/rooms?%{QUERY_STRING}#deluxe-marina-view [R=301,L,NE]
+    RewriteRule ^rooms/king-room-with-marina-view/?$ https://www.oceansresorthotel.co.nz/rooms#deluxe-marina-view [R=301,L,NE]
+    RewriteRule ^about/tutukaka-attractions/?$ https://www.oceansresorthotel.co.nz/activities [R=301,L,NE]
+    RewriteRule ^amenities/?$ https://www.oceansresorthotel.co.nz/about [R=301,L,NE]
+    RewriteRule ^en-gb/dining/?$ https://www.oceansresorthotel.co.nz/dining [R=301,L,NE]
+    RewriteCond %{QUERY_STRING} !^$
+    RewriteRule ^rooms/king-room-with-balcony-and-marina-view/?$ https://www.oceansresorthotel.co.nz/rooms?%{QUERY_STRING}#deluxe-marina-balcony [R=301,L,NE]
+    RewriteRule ^rooms/king-room-with-balcony-and-marina-view/?$ https://www.oceansresorthotel.co.nz/rooms#deluxe-marina-balcony [R=301,L,NE]
+    RewriteRule ^about/ocean-resort-hotel/?$ https://www.oceansresorthotel.co.nz/about [R=301,L,NE]
+
     # Normalise public page variants AND host/protocol in one hop.
     # THE_REQUEST prevents a second redirect after an internal file rewrite.
     # Existing query strings (enquiry preselection / permanent TV QR) survive.
